@@ -26,9 +26,9 @@ mod app {
         loop {}
     }
 
-    #[task(binds = Interrupt1, priority = 1, shared = [])]
+    #[task(binds = Interrupt1, priority = 1, shared = [r])]
     fn i1(mut cx: i1::Context) {}
-    #[task(binds = Interrupt2, priority = 2, shared=[])]
+    #[task(binds = Interrupt2, priority = 2, shared=[r])]
     fn i2(mut cx: i2::Context) {}
 }
 

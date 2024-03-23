@@ -84,26 +84,35 @@ checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
 [[package]]
 name = "hippomenes-core"
 version = "0.1.0"
-source = "git+https://github.com/onsdagens/hippomenes-core#92aadd29e7dece69dd35d1365ac7376972e37cff"
+source = "git+https://github.com/onsdagens/hippomenes-core#184e4e9a76e5b4737409d9cc35663bee01f0951e"
 dependencies = [
  "const_format",
+ "critical-section",
  "hippomenes-derive",
 ]
 
 [[package]]
 name = "hippomenes-derive"
 version = "0.1.0"
-source = "git+https://github.com/onsdagens/hippomenes-core#92aadd29e7dece69dd35d1365ac7376972e37cff"
+source = "git+https://github.com/onsdagens/hippomenes-core#184e4e9a76e5b4737409d9cc35663bee01f0951e"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.52",
+ "syn 2.0.53",
+]
+
+[[package]]
+name = "hippomenes-hal"
+version = "0.1.0"
+source = "git+https://github.com/onsdagens/hippomenes-core#184e4e9a76e5b4737409d9cc35663bee01f0951e"
+dependencies = [
+ "hippomenes-core",
 ]
 
 [[package]]
 name = "hippomenes-rt"
 version = "0.1.0"
-source = "git+https://github.com/onsdagens/hippomenes-core#92aadd29e7dece69dd35d1365ac7376972e37cff"
+source = "git+https://github.com/onsdagens/hippomenes-core#184e4e9a76e5b4737409d9cc35663bee01f0951e"
 dependencies = [
  "hippomenes-core",
  "hippomenes-rt-macros",
@@ -112,7 +121,7 @@ dependencies = [
 [[package]]
 name = "hippomenes-rt-macros"
 version = "0.1.0"
-source = "git+https://github.com/onsdagens/hippomenes-core#92aadd29e7dece69dd35d1365ac7376972e37cff"
+source = "git+https://github.com/onsdagens/hippomenes-core#184e4e9a76e5b4737409d9cc35663bee01f0951e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -124,6 +133,7 @@ name = "hippomenes_rust_examples"
 version = "0.1.0"
 dependencies = [
  "hippomenes-core",
+ "hippomenes-hal",
  "hippomenes-rt",
  "rtic",
 ]
@@ -252,9 +262,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.52"
+version = "2.0.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b699d15b36d1f02c3e7c69f8ffef53de37aefae075d8488d4ba1a7788d574a07"
+checksum = "7383cd0e49fff4b6b90ca5670bfd3e9d6a733b3f90c686605aa7eec8c4996032"
 dependencies = [
  "proc-macro2",
  "quote",
