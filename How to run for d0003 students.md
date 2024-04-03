@@ -1,0 +1,31 @@
+## How to run for d0003e students
+On windows:
+Locate the vivado.bat file within the vivado install folder.
+Cd to hippomenes/fpga
+run C:\Xilinx\Vivado\2023.2\bin\vivado.bat -mode tcl -source arty.tcl
+This will create the Vivado project file arty/arty.xpr
+
+- Run Synthesis
+- Run Implementation
+- Generate Bitstream
+- Open Hardware Manager (the ARTY needs to be connected over USB)
+- Program Device (the `fpga\arty\arty.runs\impl_1\fgpa_arty.bit` under Windows or `fpga/arty/arty.runs/impl_1/fgpa_arty.bit` under Linux).
+
+Source file examples are found under `rust_examples`, to build `asm_loop`:
+
+```shell
+cargo build --example asm_loop --release
+elf2mem -f ./target/riscv32i-unknown-none-elf/release/examples/asm_loop -t binary.mem
+```
+
+To patch the generated bitstream with the new binary, run in the `fpga` folder, for Windows:
+
+```shell
+./program_arty.cmd
+```
+
+or, for Linux
+
+```shell
+./program_arty.sh
+```
