@@ -1,0 +1,6 @@
+##TODO
+- Decide on what kinds of labs we want to incorporate into d0003e
+- Make a streamlined process for both windows and linux (and possibly mac?) on how to run code on arty without having to go through synthesisand shit through vivado
+- Make a lab specific datasheet/addon to the ordinary datasheet
+- Add a screen to arty. Either spi or through the standard connectors on the fpga(dont remember the name of those). 
+- Evaluate how hard it would be for a student to use this screen in the current format, is a library needed? (Note i personally believe it was a very good exercise to be forced to look through the datasheets for the registers that corresponded to each of the segments)
