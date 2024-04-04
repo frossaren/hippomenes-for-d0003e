@@ -2,7 +2,8 @@
 On windows:
 Locate the vivado.bat file within the vivado install folder.
 Cd to hippomenes/fpga
-run C:\Xilinx\Vivado\2023.2\bin\vivado.bat -mode tcl -source arty.tcl
+Note: If you are unable to run vivado through the console on windows it means vivado isnt added in the path variable. To do this go to advanced system settings, enviroment variables and add the path to the folder where vivado.bat is located.
+run vivado -mode tcl -source arty.tcl
 This will create the Vivado project file arty/arty.xpr
 
 - Run Synthesis
