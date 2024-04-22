@@ -13,5 +13,5 @@ This will create the Vivado project file arty/arty.xpr
 - Program Device (the `fpga\arty\arty.runs\impl_1\fgpa_arty.bit` under Windows or `fpga/arty/arty.runs/impl_1/fgpa_arty.bit` under Linux).
 
 Source file examples are found under `rust_examples`, to build `asm_loop`:
-On windows run ./run.bat from the rust examples folder
+On windows, navigate to "rust_examples" then run ./run.bat "file", where "file" is the name of the rust program in rust_examples. This will build the program and flash it to the fpga
 or on linux run the run.sh from the same folder
