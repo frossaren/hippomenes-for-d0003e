@@ -13,20 +13,5 @@ This will create the Vivado project file arty/arty.xpr
 - Program Device (the `fpga\arty\arty.runs\impl_1\fgpa_arty.bit` under Windows or `fpga/arty/arty.runs/impl_1/fgpa_arty.bit` under Linux).
 
 Source file examples are found under `rust_examples`, to build `asm_loop`:
-```shell
-cargo build --example asm_loop --release
-elf2mem -f ./target/riscv32i-unknown-none-elf/release/examples/asm_loop -t binary.mem
-```
-You may need to run `rustup target add riscv32i-unknown-none-elf` if the compilation fails (to add the riscv-32i instruction set to the rust compiler?)
-
-To patch the generated bitstream with the new binary, run in the `fpga` folder, for Windows:
-
-```shell
-./program_arty.cmd
-```
-
-or, for Linux
-
-```shell
-./program_arty.sh
-```
+On windows run ./run.bat from the rust examples folder
+or on linux run the run.sh from the same folder
