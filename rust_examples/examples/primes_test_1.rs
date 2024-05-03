@@ -59,7 +59,7 @@ mod app {
         timer.write(0b100000000001110); // interrupt every (1024 << 14) cycles, at 20Mhz yields
                                         // ~1.19Hz
 
-        // primes::spawn().unwrap();
+        rtic::export::pend(interrupt1::Interrupt1);
 
         (
             Shared { dummy: 0 },
@@ -71,6 +71,11 @@ mod app {
                 pin3,
             },
         )
+    }
+
+    #[idle]
+    fn idle(_: idle::Context) -> ! {
+        loop {}
     }
 
     // This interrupt task will switch between led0-2 in a cycle
@@ -89,15 +94,18 @@ mod app {
         } else if *cx.local.light == 2 {
             cx.local.pin2.set_high();
         }
+
         // Increment light to be turned on for next interrupt, modulo 3 for 3 lights
         *cx.local.light += 1;
-        *cx.local.light %= 3;
+        if *cx.local.light == 3 {
+            *cx.local.light = 0;
+        }
     }
 
     // This background task will toggle led3 every time it finds a new prime
-    #[task(priority = 0, local = [pin3])]
-    async fn primes(cx: primes::Context) {
-        let mut n = 0;
+    #[task(binds = Interrupt1, priority = 1, shared = [dummy], local = [pin3])]
+    fn primes(cx: primes::Context) {
+        let mut n = 30000;
         let mut highest_prime_so_far;
         let mut blink = false;
 
