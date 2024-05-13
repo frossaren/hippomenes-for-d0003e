@@ -35,7 +35,7 @@ module fpga_arty (
       .reset(sw[1]),
       .btn,
       .led,
-      .rx
+      .tx(rx) // connect hippo TX with FTDI RX
   );
 
   clk_wiz_0 clk_gen (

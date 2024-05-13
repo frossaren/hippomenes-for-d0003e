@@ -10,16 +10,9 @@ module top_arty (
     input  logic reset,
     input  BtnT  btn,
     output LedT  led,
-
-    output logic rx
+    output logic tx
     // TODO: gpio
-    // input  GpioT gpio_in,
-    // output GpioT gpio_out,
-    // output GpioT gpio_dir
 );
-
-  // import mem_pkg::*;
-
   IMemAddrT pc_interrupt_mux_out;
   // registers
   IMemAddrT pc_reg_out;
@@ -95,6 +88,7 @@ module top_arty (
   alu_a_mux_t decoder_alu_a_mux_sel;
   alu_b_mux_t decoder_alu_b_mux_sel;
   alu_op_t decoder_alu_op;
+  mul_op_t decoder_mul_op;
   logic decoder_sub_arith;
   word decoder_imm;
   r decoder_rs1;
@@ -138,6 +132,7 @@ module top_arty (
       .alu_b_mux_sel(decoder_alu_b_mux_sel),
       .alu_op(decoder_alu_op),
       .sub_arith(decoder_sub_arith),
+      .mul_op(decoder_mul_op),
       // data memory
       .dmem_write_enable(decoder_dmem_write_enable),
       .dmem_sign_extend(decoder_dmem_sign_extend),
@@ -219,6 +214,13 @@ module top_arty (
       .op(decoder_alu_op),
       .res(alu_res)
   );
+  word mul_res;
+  mul mul (
+      .a  (alu_a_mux_out),
+      .b  (alu_b_mux_out),
+      .op (decoder_mul_op),
+      .res(mul_res)
+  );
 
   word  dmem_data_out;
   logic dmem_alignment_error;
@@ -256,8 +258,32 @@ module top_arty (
       .direct_out(csr_led_direct_out),
       .out(csr_led_out)
   );
-  assign led = LedT'(csr_led_out[LedWidth - 2:0]);
-  assign rx = csr_led_out[LedWidth - 1]; //last pin is RX
+  assign led = LedT'(csr_led_out[LedWidth-1:0]);
+  // assign rx = csr_led_out[LedWidth-1];  //last pin is RX
+
+  // Button input
+  word csr_btn_out;
+  word csr_btn_direct_out;  // currently not used
+  csr #(
+      .CsrWidth(BtnWidth),
+      .Addr(BtnAddr),
+      .Write(0)  // only readable register
+  ) csr_btn (
+      // in
+      .clk,
+      .reset,
+      .csr_enable(decoder_csr_enable),
+      .csr_addr(decoder_csr_addr),
+      .rs1_zimm(decoder_rs1),
+      .rs1_data(rf_rs1),
+      .csr_op(decoder_csr_op),
+      .ext_data(0),
+      .ext_write_enable(0),
+      // out
+      .direct_out(csr_btn_direct_out),
+      .out(csr_btn_out)
+  );
+  assign csr_btn.data = btn;
 
 
   // TODO: GPIO
@@ -323,16 +349,42 @@ module top_arty (
       .interrupt_out(n_clic_interrupt_out)
   );
 
+  word  d_in;
+  logic uart_next;
+  word  fifo_data;
+  word  fifo_csr_data_out;
+  logic fifo_have_next;
+  fifo i_fifo (
+      .clk_i(clk),
+      .reset_i(reset),
+      .next(uart_next),
+      .csr_enable(decoder_csr_enable),
+      .csr_addr(decoder_csr_addr),
+      .rs1_zimm(decoder_rs1),
+      .rs1_data(rf_rs1),
+      .csr_op(decoder_csr_op),
+      .data(fifo_data),
+      .csr_data_out(fifo_csr_data_out),
+      .have_next(fifo_have_next)
+  );
+  uart i_uart (
+      .clk_i(clk),
+      .reset_i(reset),
+      .prescaler(0),
+      .d_in(fifo_data),
+      .rts(fifo_have_next),
+      .tx,
+      .next(uart_next)
+  );
+
   word csr_out;
   // match CSR addresses
   always_comb begin
-    csr_out = n_clic_csr_out;
-    // TODO: for now we can only read csr:s from n_clic
-    // if (decoder_csr_addr == GpioCsrData) csr_out = csr_gpio_dir_out;
-    // else if (decoder_csr_addr == GpioCsrDir) csr_out = csr_gpio_data_out;
-    // else csr_out = n_clic_csr_out;
-    // // TODO: should we return 0 on reads for non existing CSRs.
-    // // Using safe Rust user code, this will never occur so perhaps not then.
+    // TODO: for now only btn
+    case (decoder_csr_addr)
+      BtnAddr: csr_out = csr_btn_out;
+      default: csr_out = 0;
+    endcase
   end
 
   wb_mux wb_mux (
@@ -341,6 +393,7 @@ module top_arty (
       .alu(alu_res),
       .csr(csr_out),
       .pc_plus_4(32'($signed(pc_adder_out))),  // should we sign extend?
+      .mul(mul_res),
       .out(wb_mux_out)
   );
 endmodule
