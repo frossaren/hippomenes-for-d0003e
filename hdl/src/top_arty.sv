@@ -329,6 +329,16 @@ module top_arty (
   //       .gpio_out
   //   );
 
+  // TEMP
+  // Send a single cycle signal to NCLIC if btn0 is pressed
+  logic button_pressed;
+  
+  posedge_detector posedge_detector (
+    .clk,
+    .signal(btn[0]),
+    .out(button_pressed)
+  );
+
   word n_clic_csr_out;
   n_clic n_clic (
       // in
@@ -341,6 +351,9 @@ module top_arty (
       //.rd(decoder_rd),
       .csr_op(decoder_csr_op),
       .pc_in(pc_branch_mux_out),
+      // External (button) interrupt
+      .ext_interrupt(button_pressed),
+
       // out
       .csr_out(n_clic_csr_out),
       .int_addr(n_clic_interrupt_addr),

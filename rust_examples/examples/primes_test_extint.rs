@@ -30,13 +30,12 @@ mod app {
 
     #[shared]
     struct Shared {
-        dummy: u8,
+        lightDir: bool,
     }
 
     #[local]
     struct Local {
         light: i32,
-        increase: bool,
         pin0: Pout0,
         pin1: Pout1,
         pin2: Pout2,
@@ -54,7 +53,7 @@ mod app {
         let pin3 = pins.pout3;
 
         let light = 0;
-        let increase = true;
+        let lightDir = true;
         let timer = peripherals.timer;
 
         timer.write(0b100000000001110); // interrupt every (1024 << 14) cycles, at 20Mhz yields
@@ -63,10 +62,9 @@ mod app {
         rtic::export::pend(interrupt1::Interrupt1);
 
         (
-            Shared { dummy: 0 },
+            Shared { lightDir },
             Local {
                 light,
-                increase,
                 pin0,
                 pin1,
                 pin2,
@@ -98,8 +96,8 @@ mod app {
     }
 
     // This interrupt task will switch between led0-2 in a cycle
-    #[task(binds = Interrupt0, priority = 3, shared = [dummy], local = [light, increase, pin0, pin1, pin2])]
-    fn i0(cx: i0::Context) {
+    #[task(binds = Interrupt0, priority = 3, shared = [lightDir], local = [light, pin0, pin1, pin2])]
+    fn i0(mut cx: i0::Context) {
         // Turn off all lights
         cx.local.pin0.set_low();
         cx.local.pin1.set_low();
@@ -115,12 +113,25 @@ mod app {
         }
 
         // Increment light to be turned on for next interrupt, modulo 3 for 3 lights
-        if *cx.local.increase {
-            *cx.local.light += 1;
-        } else {
-            *cx.local.light -= 1;
-        }
-        *cx.local.light %= 3;
+        cx.shared.lightDir.lock(|lightDir| {
+            if *lightDir {
+                *cx.local.light += 1;
+            } else {
+                *cx.local.light -= 1;
+            }
+            *cx.local.light = ((*cx.local.light % 3) + 3) % 3; // Rust % gives remainder, not modulo. This is a workaround
+        });
+    }
+
+    #[task(binds = Interrupt1, shared = [lightDir])]
+    fn i1(mut cx: i1::Context) {
+        cx.shared.lightDir.lock(|lightDir| {
+            if *lightDir {
+                *lightDir = false;
+            } else {
+                *lightDir = true;
+            }
+        });
     }
 }
 

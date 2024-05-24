@@ -16,6 +16,8 @@ module n_clic
     input csr_op_t  csr_op,
     // epc
     input IMemAddrT pc_in,
+    // external input interrupt (buttons)
+    input logic     ext_interrupt,
 
     output word               csr_out,
     output IMemAddrT          int_addr,
@@ -47,6 +49,9 @@ module n_clic
       .csr_direct_out(timer_direct_out),
       .csr_out(timer_out)
   );
+
+  // Button extint
+  logic button_interrupt_set;
 
   // CSR m_int_thresh
   logic m_int_thresh_write_enable;
@@ -224,6 +229,13 @@ module n_clic
       // pend 0 if timer interrupt
       ext_write_enable[0] = 1;
       ext_entry_data[0]   = entry[0] | 1;  // set pend bit
+    end
+
+    // External interrupt (button)
+    if (ext_interrupt) begin
+      // pend 1 if external (button) interrupt
+      ext_write_enable[1] = 1;
+      ext_entry_data[1]   = entry[1] | 1;  // set pend bit
     end
     
     if (mstatus_direct_out[3] == 0) begin
