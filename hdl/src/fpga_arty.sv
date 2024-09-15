@@ -27,6 +27,9 @@ module fpga_arty (
     output logic rx,  // host 
     input  logic tx,  // host
 
+    output logic scl,
+    output logic sda,
+
     input logic sw0,
     input logic sw1,
 

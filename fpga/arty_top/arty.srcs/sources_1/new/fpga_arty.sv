@@ -14,6 +14,9 @@ module fpga_arty (
     output logic rx,  // seen from host side 
     input  logic tx,
 
+    output logic scl,
+    output logic sda,
+
     input BtnT btn
 );
 
@@ -53,5 +56,8 @@ module fpga_arty (
     r_count  <= r_count + 1;
     led_r[0] <= r_count[22];
   end
+
+  assign scl = 1'b0;
+  assign sda = clk;
 
 endmodule
