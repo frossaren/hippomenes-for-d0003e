@@ -51,13 +51,16 @@ module fpga_arty (
       .locked
   );
 
+  i2c_master i2c (
+    .sysclk(clk),
+    .scl,
+    .sda
+  );
+
   // clock devider
   always @(posedge clk) begin
     r_count  <= r_count + 1;
     led_r[0] <= r_count[22];
   end
-
-  assign scl = 1'b0;
-  assign sda = clk;
 
 endmodule

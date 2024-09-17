@@ -2,7 +2,7 @@
 `timescale 1ns / 1ps
 
 /* TODO:
- * Create a clock structure that generates the necessary 400KHz
+ * Create a clock structure that generates the necessary 400KHz from main 100MHz
  * From that structure, generate a "data clock" that signals when to update SDA line
  * Allow enabling/disabling of output of SCL
  * Finish FSM to allow writing and reading of data
@@ -20,8 +20,9 @@ module i2c_master (
     input logic [6:0] address,
     inout logic [7:0] data,
 
+    // TEMP
     output logic scl,
-    inout logic sda
+    output logic sda
 );
 
   /* 
@@ -56,9 +57,48 @@ module i2c_master (
   reg [6:0] addr_buff;
   reg rw_buff;
 
-  logic clk; // TODO
+  // SCL register will be cycled once every 250 normal clock cycles
+  // 100MHz / 250 = 400KHz
+  // Quadrants of 250: 0-61, 62-124, 125-187, 188-249
+  logic scl_internal = 1'b0;
+  logic scl_stretch = 1'b0;
+  logic sda_clk = 1'b0; // Clock signal that SDA line is clear to update (SCL is low)
+  reg [7:0] scl_counter = '0;
 
-  always_ff @(posedge clk or negedge clk or posedge reset) begin
+  always_ff @(posedge sysclk or posedge reset) begin
+    if (reset) begin
+      scl_counter <= '0;
+      scl_stretch <= 1'b0;
+    end else begin
+      // Increase counter if it's not being stretched, or reset at 249
+      if (scl_counter == 249) begin
+        scl_counter <= '0;
+      end else if (scl_stretch == 0) begin
+        scl_counter <= scl_counter + 1'b1;
+      end
+
+      // Send a proper data clock and SCL signal depending on where in the SCL cycle we are
+      if (scl_counter < 62) begin
+        scl_internal <= 1'b0;
+        sda_clk <= 1'b0;
+      end else if (scl_counter > 61 && scl_counter < 125) begin
+        scl_internal <= 1'b0;
+        sda_clk <= 1'b1;
+      end else if (scl_counter > 124 && scl_counter < 188) begin
+        scl_internal <= 1'b1;
+        // Check for slave stretching clk
+        if (scl == 1'b0) begin
+          scl_stretch <= 1'b1;
+        end
+        sda_clk <= 1'b1;
+      end else begin
+        scl_internal <= 1'b1;
+        sda_clk <= 1'b0;
+      end
+    end
+  end
+
+  always_ff @(posedge sda_clk or posedge reset) begin
     if (reset) begin
       state <= Ready;
     end else begin
@@ -67,65 +107,69 @@ module i2c_master (
   end
 
   // State will update on every edge of clk
-  always_comb begin
-    case (state)
-      Ready: begin
-        if (enable) begin
-          addr_buff <= address;
-          data_buff <= data;
-          rw_buff <= rw;
-          busy <= 1'b1;
-          next_state <= Start_Transmission;
-        end else begin
-          busy <= 1'b0;
-          next_state <= Ready;
-        end
-      end
+  // always_comb begin
+  //   case (state)
+  //     Ready: begin
+  //       if (enable) begin
+  //         addr_buff <= address;
+  //         data_buff <= data;
+  //         rw_buff <= rw;
+  //         busy <= 1'b1;
+  //         next_state <= Start_Transmission;
+  //       end else begin
+  //         busy <= 1'b0;
+  //         next_state <= Ready;
+  //       end
+  //     end
 
-      Start_Transmission: begin
-        sda <= 1'b0;
-        next_state <= Start_Clock;
-      end
+  //     Start_Transmission: begin
+  //       sda <= 1'b0;
+  //       next_state <= Start_Clock;
+  //     end
 
-      Start_Clock: begin
-        if (!clk) begin
-          scl <= 1'b0;
-          next_state <= Send_Command_Bit;
-        end
-      end
+  //     Start_Clock: begin
+  //       if (!clk) begin
+  //         scl <= 1'b0;
+  //         next_state <= Send_Command_Bit;
+  //       end
+  //     end
 
-      Send_Command_Bit: begin
-        if ()
-      end
+  //     Send_Command_Bit: begin
+  //       if ()
+  //     end
       
-      Slave_Ack1: begin
+  //     Slave_Ack1: begin
 
-      end
+  //     end
       
-      Send_Write_Bit: begin
+  //     Send_Write_Bit: begin
 
-      end
+  //     end
       
-      Slave_Ack2: begin
+  //     Slave_Ack2: begin
 
-      end
+  //     end
       
-      Read_Bit: begin
+  //     Read_Bit: begin
 
-      end
+  //     end
       
-      Master_Ack: begin
+  //     Master_Ack: begin
 
-      end
+  //     end
       
-      Stop_Transmission: begin
+  //     Stop_Transmission: begin
 
-      end
+  //     end
       
-      default: begin
+  //     default: begin
 
-      end
-    endcase
-  end
+  //     end
+  //   endcase
+  // end
+
+  // TODO: TEMP
+  assign scl = scl_counter[0];
+  assign sda = scl_counter[1];
 
 endmodule
