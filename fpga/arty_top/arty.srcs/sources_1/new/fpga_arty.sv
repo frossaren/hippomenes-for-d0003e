@@ -14,8 +14,8 @@ module fpga_arty (
     output logic rx,  // seen from host side 
     input  logic tx,
 
-    output logic scl,
-    output logic sda,
+    inout logic scl,
+    inout logic sda,
 
     input BtnT btn
 );
