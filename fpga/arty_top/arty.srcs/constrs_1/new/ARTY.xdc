@@ -15,6 +15,9 @@ set_false_path -from [get_ports btn[1] ]
 set_false_path -from [get_ports btn[2] ]
 set_false_path -from [get_ports btn[3] ]
 
+set_false_path -to [get_ports scl ]
+set_false_path -to [get_ports sda ]
+
 set_false_path -to [get_ports led[0] ]
 set_false_path -to [get_ports led[1] ]
 set_false_path -to [get_ports led[2] ]
@@ -45,6 +48,10 @@ set_property -dict {PACKAGE_PIN D9 IOSTANDARD LVCMOS33} [get_ports btn[0] ]
 set_property -dict {PACKAGE_PIN C9 IOSTANDARD LVCMOS33} [get_ports btn[1] ]
 set_property -dict {PACKAGE_PIN B9 IOSTANDARD LVCMOS33} [get_ports btn[2] ]
 set_property -dict {PACKAGE_PIN B8 IOSTANDARD LVCMOS33} [get_ports btn[3] ]
+
+## I2C
+set_property -dict {PACKAGE_PIN L18 IOSTANDARD LVCMOS33 PULLUP TRUE}  [get_ports scl]
+set_property -dict {PACKAGE_PIN M18 IOSTANDARD LVCMOS33 PULLUP TRUE} [get_ports sda]
 
 ## Rx/Tx
 set_property -dict {PACKAGE_PIN D10 IOSTANDARD LVCMOS33} [get_ports rx]

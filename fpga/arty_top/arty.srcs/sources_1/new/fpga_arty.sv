@@ -17,10 +17,12 @@ module fpga_arty (
 
     input logic [1:0] sw,
 
-    input logic [3:0] btn
+    input logic [3:0] btn,
     // input logic btn1,
     // input logic btn2,
     // input logic btn3
+    inout logic scl,
+    inout logic sda
 );
 
   logic clk;
@@ -75,6 +77,9 @@ module fpga_arty (
       // .gpio_in({led1, rx, tx}),
       // .gpio_out({led1, rx, tx}),
       // .rx(tx),
+      
+      .scl,
+      .sda
   );
 
   clk_wiz_0 clk_gen (

@@ -17,6 +17,9 @@ module fpga_arty (
 
     input logic[1:0] sw,
 
+    output logic scl,
+    output logic sda,
+
     input logic[3:0] btn
     // input logic btn1,
     // input logic btn2,
