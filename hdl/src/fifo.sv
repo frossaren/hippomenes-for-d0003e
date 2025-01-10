@@ -1,7 +1,13 @@
 // uart
 `timescale 1ns / 1ps
 
-module fifo (
+module fifo
+  import config_pkg::*;
+#(
+    parameter CsrAddrT Addr,
+    parameter integer PtrSize,
+    parameter integer QueueSize
+) (
     input logic clk_i,
     input logic reset_i,
     input logic next,
@@ -17,12 +23,12 @@ module fifo (
 );
   import decoder_pkg::*;
   word data_int;
-  word queue[FifoQueueSize];  // 32 word queue, should be parametric
-  logic [FifoPtrSize:0] in_ptr;
-  logic [FifoPtrSize:0] out_ptr;
+  word queue[QueueSize];  // 32 word queue, should be parametric
+  logic [PtrSize:0] in_ptr;
+  logic [PtrSize:0] out_ptr;
   csr #(
       .CsrWidth(32),
-      .Addr(FifoCsrAddr)
+      .Addr(Addr)
   ) csr (
       .clk(clk_i),
       .reset(reset_i),
@@ -46,7 +52,7 @@ module fifo (
       in_ptr  <= 0;
       out_ptr <= 0;
     end else begin
-      if (csr_enable == 1 && csr_addr == FifoCsrAddr) begin
+      if (csr_enable == 1 && csr_addr == Addr) begin
         queue[in_ptr] <= data_int;
         in_ptr <= in_ptr + 1;
       end

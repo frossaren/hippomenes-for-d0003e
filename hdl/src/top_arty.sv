@@ -10,8 +10,12 @@ module top_arty (
     input  logic reset,
     input  BtnT  btn,
     output LedT  led,
-    output logic tx
+    output logic tx,
     // TODO: gpio
+
+    // I2C
+    inout logic scl,
+    inout logic sda
 );
   IMemAddrT pc_interrupt_mux_out;
   // registers
@@ -362,12 +366,15 @@ module top_arty (
       .interrupt_out(n_clic_interrupt_out)
   );
 
-  word  d_in;
   logic uart_next;
-  word  fifo_data;
-  word  fifo_csr_data_out;
-  logic fifo_have_next;
-  fifo i_fifo (
+  word  uart_fifo_data;
+  word  uart_fifo_csr_data_out;
+  logic uart_fifo_have_next;
+  fifo #(
+    .Addr(UARTFifoCsrAddr),
+    .PtrSize(UARTFifoPtrSize),
+    .QueueSize(UARTFifoQueueSize)
+  ) i_fifo (
       .clk_i(clk),
       .reset_i(reset),
       .next(uart_next),
@@ -376,19 +383,92 @@ module top_arty (
       .rs1_zimm(decoder_rs1),
       .rs1_data(rf_rs1),
       .csr_op(decoder_csr_op),
-      .data(fifo_data),
-      .csr_data_out(fifo_csr_data_out),
-      .have_next(fifo_have_next)
+      .data(uart_fifo_data),
+      .csr_data_out(uart_fifo_csr_data_out),
+      .have_next(uart_fifo_have_next)
   );
   uart i_uart (
       .clk_i(clk),
       .reset_i(reset),
       .prescaler(0),
-      .d_in(fifo_data),
-      .rts(fifo_have_next),
+      .d_in(uart_fifo_data),
+      .rts(uart_fifo_have_next),
       .tx,
       .next(uart_next)
   );
+
+// I2C master and fifo send/write buffer
+  logic i2c_fifo_next;
+  word  i2c_fifo_data;
+  word  i2c_fifo_csr_data_out;
+  logic i2c_fifo_have_next;
+
+  // TEMP
+  // Start transmission if button4 is pressed
+  logic start_pressed;
+  posedge_detector posedge_detector2 (
+    .clk,
+    .signal(btn[3]),
+    .out(start_pressed)
+  );
+
+  logic scl_i;
+  logic scl_o;
+  logic scl_t;
+  logic sda_i;
+  logic sda_o;
+  logic sda_t;
+  fifo #(
+    .Addr(I2CFifoCsrAddr),
+    .PtrSize(I2CFifoPtrSize),
+    .QueueSize(I2CFifoQueueSize)
+  ) i2c_fifo (
+      .clk_i(clk),
+      .reset_i(reset),
+      .next(i2c_fifo_next & i2c_fifo_have_next),
+      .csr_enable(decoder_csr_enable),
+      .csr_addr(decoder_csr_addr),
+      .rs1_zimm(decoder_rs1),
+      .rs1_data(rf_rs1),
+      .csr_op(decoder_csr_op),
+      .data(i2c_fifo_data),
+      .csr_data_out(i2c_fifo_csr_data_out),
+      .have_next(i2c_fifo_have_next)
+  );
+  i2c_master i2c (
+    // Prescale by 12.5 (20000000/(4*400000) = 12.5). 13 is the closest
+    .clk,
+    .rst(reset),
+    .prescale(13),
+
+    // SCL/SDA pins
+    .scl_i,
+    .scl_o,
+    .scl_t,
+    .sda_i,
+    .sda_o,
+    .sda_t,
+
+    // TEMP
+    .s_axis_cmd_address(7'h27),
+    .s_axis_cmd_valid('1),
+    // .s_axis_data_tdata(8'h34),
+    // .s_axis_data_tvalid('1),
+    // .s_axis_data_tlast(btn[3]), // stop send
+    .s_axis_cmd_write_multiple(start_pressed), // start send
+
+    // Connect to send buffer FIFO
+    .s_axis_data_tdata(i2c_fifo_data), // Data from FIFO
+    .s_axis_data_tlast(!i2c_fifo_have_next), // FIFO has data, means not the last
+    .s_axis_data_tready(i2c_fifo_next), // When I2C becomes ready (sends a new byte), load next word from fifo
+    .s_axis_data_tvalid('1) // Should this always be true?
+  );
+
+  // Combine separate i/o/t into single inout channels (with Z for high to allow pull by slave)
+  assign scl_i = scl;
+  assign scl = scl_t ? 1'bz : scl_o;
+  assign sda_i = sda;
+  assign sda = sda_t ? 1'bz : sda_o;
 
   word csr_out;
   // match CSR addresses

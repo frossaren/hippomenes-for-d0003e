@@ -38,7 +38,10 @@ module fpga_arty (
       .reset(sw[1]),
       .btn,
       .led,
-      .tx(rx) // connect hippo TX with FTDI RX
+      .tx(rx), // connect hippo TX with FTDI RX
+      
+      .scl,
+      .sda
   );
 
   clk_wiz_0 clk_gen (
@@ -49,12 +52,6 @@ module fpga_arty (
       // Status and control signals
       .reset(sw[0]),
       .locked
-  );
-
-  i2c_master i2c (
-    .sysclk(clk),
-    .scl,
-    .sda
   );
 
   // clock devider

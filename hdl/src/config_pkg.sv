@@ -80,11 +80,16 @@ package config_pkg;
   localparam type TimeStampT = logic [TimeStampWidth-1:0];
 
   // UART config
-  localparam integer unsigned FifoQueueSize = 32;
-  localparam integer unsigned FifoPtrSize = $clog2(FifoQueueSize);
-  localparam integer unsigned FifoCsrAddr = 'h50;
+  localparam integer unsigned UARTFifoQueueSize = 32;
+  localparam integer unsigned UARTFifoPtrSize = $clog2(UARTFifoQueueSize);
+  localparam integer unsigned UARTFifoCsrAddr = 'h50;
   localparam integer unsigned CoreFreq = 20000000;
   localparam integer unsigned UartBaudRate = 115200;
   localparam integer unsigned UartCmpVal = CoreFreq / UartBaudRate;
+
+  // I2C config
+  localparam integer unsigned I2CFifoQueueSize = 32;
+  localparam integer unsigned I2CFifoPtrSize = $clog2(I2CFifoQueueSize);
+  localparam integer unsigned I2CFifoCsrAddr = 'h60;
 
 endpackage
