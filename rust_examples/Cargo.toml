@@ -10,10 +10,18 @@ edition = "2021"
 [dependencies]
 #hippomenes-hal = {path="../../hippomenes-core/hippomenes-hal/"}
 hippomenes-hal = {git="https://github.com/onsdagens/hippomenes-core"}
-#hippomenes-core = {path="../../../hippomenes-core/"}
+#hippomenes-core = {path="../../hippomenes-core/"}
 hippomenes-core = {git="https://github.com/onsdagens/hippomenes-core"}
 #hippomenes-rt = {path="../../hippomenes-core/hippomenes-rt/"}
 hippomenes-rt = {git="https://github.com/onsdagens/hippomenes-core"}
+#hippomenes-derive = {path="../../hippomenes-core/hippomenes-derive/"}
+hippomenes-derive = {git="https://github.com/onsdagens/hippomenes-core"}
 #rtic = {path = "../../rtic/rtic/", features=["riscv-clic-backend"]}
 rtic = {git="https://github.com/onsdagens/rtic", branch="hippomenes", features=["riscv-clic-backend"]}
 
+# temp for dev
+critical-section = {version="1.1.2"}
+const_format = "0.2.32"
+[lib]
+test = false
+bench = false

@@ -4,7 +4,9 @@
 module fifo
   import config_pkg::*;
   import decoder_pkg::*;
-(
+#(
+  parameter integer Addr
+) (
     input logic clk_i,
     input logic reset_i,
     input logic next,
@@ -32,7 +34,7 @@ module fifo
   word byte_out;
   csr #(
       .CsrWidth(8),
-      .Addr(FifoByteCsrAddr)
+      .Addr(Addr)
   ) csr_byte (
       .clk(clk_i),
       .reset(reset_i),

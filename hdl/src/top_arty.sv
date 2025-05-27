@@ -533,9 +533,9 @@ module top_arty (
   logic sda_o;
   logic sda_t;
   fifo #(
-    .Addr(I2CFifoCsrAddr),
-    .PtrSize(I2CFifoPtrSize),
-    .QueueSize(I2CFifoQueueSize)
+    .Addr(I2CFifoCsrAddr)
+    // .PtrSize(I2CFifoPtrSize),
+    // .QueueSize(I2CFifoQueueSize)
   ) i2c_fifo (
       .clk_i(clk),
       .reset_i(reset),

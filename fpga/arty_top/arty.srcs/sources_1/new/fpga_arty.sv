@@ -73,7 +73,7 @@ module fpga_arty (
       .reset(tmp_sw1),
       .btn(btn),
       .led(led),
-      .tx(rx)
+      .tx(rx),
       // .gpio_in({led1, rx, tx}),
       // .gpio_out({led1, rx, tx}),
       // .rx(tx),
